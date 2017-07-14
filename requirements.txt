@@ -1,0 +1,7 @@
+imgurpython
+selenium
+pillow
+configparser
+requests
+argparse
+csv

@@ -1,0 +1,84 @@
+import requests
+import argparse
+import csv
+import configparser
+from datetime import datetime
+from urlscreenshoter.helper import Helper
+from urlscreenshoter.imgur_helper import ImgurHelper
+
+TMP_FILE = '/tmp/screenshot.png'
+SEND_FILE = '/tmp/screenshot.jpg'
+
+def get_config_values():
+    parser = configparser.ConfigParser()
+    parser.read('/etc/urlscreenshoter.conf')
+    client_i = parser['DEFAULT']['client_id']
+    client_s = parser['DEFAULT']['client_secret']
+    return client_i, client_s
+
+def parse_resolution(string):
+    res = string.split('x')
+    return [int(x) for x in res]
+     
+def get_args():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,description='YOU NEED A IMGUR ACCOUNT TO USE THIS PROGRAM. A program to visit a list of URLs, screenshot these and then upload these screens to Imgur.')
+    parser.add_argument('input',help='The text file that stores the URLs, one per line')
+    parser.add_argument('--output',default='result.csv',metavar='-o',help='The file to store the output')
+    parser.add_argument('--resolution',default='1024x768',metavar='-r',help='Resolution of screenshots')
+    return parser.parse_args()
+
+def main():
+    args = get_args()
+    INPUT_FILE  = args.input
+    OUTPUT_FILE = args.output
+    RESOLUTION  = parse_resolution(args.resolution)
+    client_id, client_secret = get_config_values()
+    imgur = ImgurHelper(client_id, client_secret)
+    CROP = (0,0,RESOLUTION[0],RESOLUTION[1])
+    # Abrir arquivo com URLS
+    links = None
+    with open(INPUT_FILE,'r') as f:
+        links = [x.replace('\n','') for x in f.readlines()]
+    # initialize file
+    output = open(OUTPUT_FILE,'w',newline='')
+    csvwriter = csv.writer(output,delimiter=',')
+    csvwriter.writerow(['URL','IMGUR LINK','Date Visited'])
+    # visitar URLS
+    for url in links:
+        # fazer upload das imagens
+        try:
+            url = Helper.fix_url(url)
+            connect = requests.get(url,timeout=5)
+            print('Connected to {}'.format(url))
+            if not connect.status_code in [200,302,301,307,308]:
+                print('Page at {} returned code'.format(url,connect.status_code) )
+                date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
+                csvwriter.writerow([url, connect.status_code,date])
+                continue
+            Helper.takeScreenshotFromUrl(url,TMP_FILE,RESOLUTION) 
+            Helper.convertImage(TMP_FILE,SEND_FILE,CROP)
+            print('Uploading image...')
+            image = imgur.upload(SEND_FILE)
+            print('screenshot from {} uploaded at {}'.format(url,image['link'])) 
+            # colocar links em txt
+            date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
+            csvwriter.writerow([url,image['link'],date])
+            output.flush()
+            #TODO: colocar links em um html
+        except requests.exceptions.Timeout:
+            print('Page at {} timed out'.format(url) )
+            date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
+            csvwriter.writerow([url, 'timed out', date])
+        except requests.exceptions.RequestsException as e:
+            print('Page at {} not found'.format(url) )
+            date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
+            csvwriter.writerow([url, 'not found', date])
+        except Exception as e:
+            print('Page {} generated a unexpected error: {}'.format(url,e))
+            date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
+            csvwriter.writerow([url, 'error', date])
+    output.close()
+
+
+if __name__ == "__main__":
+    main()
