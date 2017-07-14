@@ -12,7 +12,7 @@ class Helper:
     @staticmethod
     def takeScreenshotFromUrl(url,file,res):
         url = Helper.fix_url(url)
-        driver = webdriver.PhantomJS()
+        driver = webdriver.PhantomJS(service_log_path=os.path.devnull)
         driver.set_window_size(res[0],res[1])
         driver.get(url)
         driver.save_screenshot(file)
