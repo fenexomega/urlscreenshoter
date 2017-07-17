@@ -10,7 +10,7 @@ setuptools.setup(name='urlscreenshoter',
          url='http://path-to-my-packagename',
          packages=['urlscreenshoter'],
          install_requires=['pillow','selenium','configparser','imgurpython',
-             'requests','argparse'],
+             'requests','argparse','htmldom'],
          entry_points={
              'console_scripts':[
                  'urlscreenshoter = urlscreenshoter.main:main'

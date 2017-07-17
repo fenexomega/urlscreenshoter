@@ -4,3 +4,4 @@ pillow
 configparser
 requests
 argparse
+htmldom
