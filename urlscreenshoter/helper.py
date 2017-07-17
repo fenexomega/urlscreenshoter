@@ -12,7 +12,7 @@ class Helper:
 
     @staticmethod
     def takeScreenshotFromUrl(url,file,res):
-        ttps://coderwall.com/p/9jgaeq/set-phantomjs-user-agent-string
+        #https://coderwall.com/p/9jgaeq/set-phantomjs-user-agent-string
         dcap = dict(DesiredCapabilities.PHANTOMJS)
         dcap["phantomjs.page.settings.userAgent"] = (
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/53 "
