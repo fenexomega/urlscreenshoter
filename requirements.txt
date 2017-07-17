@@ -4,4 +4,3 @@ pillow
 configparser
 requests
 argparse
-csv

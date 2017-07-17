@@ -6,6 +6,7 @@ import configparser
 from datetime import datetime
 from urlscreenshoter.helper import Helper
 from urlscreenshoter.imgur_helper import ImgurHelper
+from urlscreenshoter.outputs.csv_outputer import CsvOutputer
 
 TMP_FILE = '/tmp/screenshot.png'
 SEND_FILE = '/tmp/screenshot.jpg'
@@ -36,14 +37,13 @@ def main():
     client_id, client_secret = get_config_values()
     imgur = ImgurHelper(client_id, client_secret)
     CROP = (0,0,RESOLUTION[0],RESOLUTION[1])
+    FILENAME  = INPUT_FILE.split('.')[0]
     # Abrir arquivo com URLS
     links = None
     with open(INPUT_FILE,'r') as f:
         links = [x.replace('\n','') for x in f.readlines()]
     # initialize file
-    output = open(OUTPUT_FILE,'w',newline='')
-    csvwriter = csv.writer(output,delimiter=',')
-    csvwriter.writerow(['URL','IMGUR LINK','Date Visited'])
+    csv = CsvOutputer(FILENAME)
     # visitar URLS
     for url in links:
         # fazer upload das imagens
@@ -54,7 +54,7 @@ def main():
             if not connect.status_code in [200,302,301,307,308]:
                 print('Page at {} returned code'.format(url,connect.status_code) )
                 date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
-                csvwriter.writerow([url, connect.status_code,date])
+                csv.writerow([url, connect.status_code,date])
                 continue
             Helper.takeScreenshotFromUrl(url,TMP_FILE,RESOLUTION) 
             Helper.convertImage(TMP_FILE,SEND_FILE,CROP)
@@ -63,22 +63,21 @@ def main():
             print('screenshot from {} uploaded at {}'.format(url,image['link'])) 
             # colocar links em txt
             date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
-            csvwriter.writerow([url,image['link'],date])
-            output.flush()
+            csv.writerow([url,image['link'],date])
             #TODO: colocar links em um html
         except requests.exceptions.Timeout:
             print('Page at {} timed out'.format(url) )
             date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
-            csvwriter.writerow([url, 'timed out', date])
+            csv.writerow([url, 'timed out', date])
         except requests.exceptions.RequestsException as e:
             print('Page at {} not found'.format(url) )
             date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
-            csvwriter.writerow([url, 'not found', date])
+            csv.writerow([url, 'not found', date])
         except Exception as e:
             print('Page {} generated a unexpected error: {}'.format(url,e))
             date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
-            csvwriter.writerow([url, 'error', date])
-    output.close()
+            csv.writerow([url, 'error', date])
+    csv.closefile()
 
 
 if __name__ == "__main__":
