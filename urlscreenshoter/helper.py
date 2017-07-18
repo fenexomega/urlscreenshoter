@@ -15,8 +15,8 @@ class Helper:
         #https://coderwall.com/p/9jgaeq/set-phantomjs-user-agent-string
         dcap = dict(DesiredCapabilities.PHANTOMJS)
         dcap["phantomjs.page.settings.userAgent"] = (
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/53 "
-            "(KHTML, like Gecko) Chrome/15.0.87")
+            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36"
+            "(KHTML, like Gecko) Chrome/37.0.2062.$")
         driver = webdriver.PhantomJS(service_log_path=os.path.devnull,desired_capabilities=dcap)
         # driver = webdriver.PhantomJS(service_log_path=os.path.devnull)
         # driver = webdriver.PhantomJS()
