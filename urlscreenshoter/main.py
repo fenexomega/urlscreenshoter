@@ -63,19 +63,16 @@ def main():
                 continue
             Helper.takeScreenshotFromUrl(url,TMP_FILE,RESOLUTION) 
             Helper.convertImage(TMP_FILE,SEND_FILE,CROP)
-            counter = 0
+            success = False
             # fazer upload das imagens
-            while counter < 3:
+            while success = False:
                 try:
                     print('Uploading image...')
                     image = imgur.upload(SEND_FILE)
                     break
                 except:
                     print('Error uploading the image, trying again')
-                    counter += 1
-            if counter == 3:
-                print('I couldn\'t upload your image. Skiping...')
-                continue
+                    success = True
             print('screenshot from {} uploaded at {}'.format(url,image['link'])) 
             date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
             row = [url,image['link'],date]
