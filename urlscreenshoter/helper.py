@@ -19,7 +19,6 @@ class Helper:
             "(KHTML, like Gecko) Chrome/37.0.2062.$")
         driver = webdriver.PhantomJS(service_log_path=os.path.devnull,desired_capabilities=dcap)
         # driver = webdriver.PhantomJS(service_log_path=os.path.devnull)
-        # driver = webdriver.PhantomJS()
         driver.set_window_size(res[0],res[1])
         url = Helper.fix_url(url)
         driver.get(url)

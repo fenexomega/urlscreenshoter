@@ -65,7 +65,7 @@ def main():
             Helper.convertImage(TMP_FILE,SEND_FILE,CROP)
             success = False
             # fazer upload das imagens
-            while success = False:
+            while success == False:
                 try:
                     print('Uploading image...')
                     image = imgur.upload(SEND_FILE)
