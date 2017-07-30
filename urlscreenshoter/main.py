@@ -9,6 +9,8 @@ from urlscreenshoter.helper import Helper
 from urlscreenshoter.imgur_helper import ImgurHelper
 from urlscreenshoter.outputs.csv_outputer import CsvOutputer
 from urlscreenshoter.outputs.html_outputer import HtmlOutputer
+from imgurpython.helpers.error import ImgurClientError
+
 
 TMP_FILE = '/tmp/screenshot.png'
 SEND_FILE = '/tmp/screenshot.jpg'
@@ -63,16 +65,15 @@ def main():
                 continue
             Helper.takeScreenshotFromUrl(url,TMP_FILE,RESOLUTION) 
             Helper.convertImage(TMP_FILE,SEND_FILE,CROP)
-            success = False
             # fazer upload das imagens
-            while success == False:
+            while True:
                 try:
                     print('Uploading image...')
                     image = imgur.upload(SEND_FILE)
                     break
-                except:
-                    print('Error uploading the image, trying again')
-                    success = True
+                except ImgurClientError as e:
+                    print('Error uploading the image, trying again...:' + e.error_message)
+
             print('screenshot from {} uploaded at {}'.format(url,image['link'])) 
             date = datetime.strftime(datetime.now(),'%d/%m/%Y %H:%M')
             row = [url,image['link'],date]
